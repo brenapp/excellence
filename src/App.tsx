@@ -17,12 +17,6 @@ import {
 } from "./util/eventHooks";
 import AwardEvaluation from "./components/AwardEvaluation";
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
-
 function App() {
   const [sku, setSku] = useState("");
 
