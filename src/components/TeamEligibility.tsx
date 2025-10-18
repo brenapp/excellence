@@ -1,5 +1,5 @@
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
-import { Team } from "robotevents/out/endpoints/teams";
+import { Team } from "robotevents";
 
 export type TeamEligibilityCriterion = {
   eligible: boolean;

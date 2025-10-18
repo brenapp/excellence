@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -16,6 +16,12 @@ import {
   useEventPresentTeams,
 } from "./util/eventHooks";
 import AwardEvaluation from "./components/AwardEvaluation";
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 
 function App() {
   const [sku, setSku] = useState("");
@@ -65,7 +71,15 @@ function App() {
   const { data: eventsToday, isLoading: isLoadingEventsToday } =
     useEventsToday();
 
-  const multipleDivisions = (event?.divisions.length ?? 0) > 1;
+  const eventsByStartDate = useMemo(() => {
+    if (!eventsToday) return {};
+    return Object.groupBy(eventsToday, (event) => {
+      const date = Date.parse(event.start ?? "");
+      return new Date(date).toISOString();
+    });
+  }, [eventsToday]);
+
+  const multipleDivisions = (event?.divisions?.length ?? 0) > 1;
 
   const isLoading =
     isLoadingEvent ||
@@ -205,11 +219,17 @@ function App() {
             disabled={isLoadingEventsToday}
           >
             <option value="">Select An Event</option>
-            {eventsToday?.map((event) => (
-              <option key={event.sku} value={event.sku}>
-                {event.name}
-              </option>
-            ))}
+            {Object.entries(eventsByStartDate)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([date, events]) => (
+                <optgroup key={date} label={date.split("T")[0]}>
+                  {events?.map((event) => (
+                    <option key={event.sku} value={event.sku}>
+                      {event.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
           </select>
           <span>or</span>
           <input
@@ -230,7 +250,7 @@ function App() {
                 className="text-green-400 inline mr-2"
               />
               {event?.name}{" "}
-              <span className="italic font-normal">
+              <span className="italic font-normal mr-2">
                 [
                 <a href={event.getURL()} target="_blank">
                   {event.sku}
@@ -292,14 +312,14 @@ function App() {
           skills &&
           awards?.map((excellence) => (
             <>
-              {event?.divisions.map((division) => (
+              {event?.divisions?.map((division) => (
                 <AwardEvaluation
-                  key={excellence.award.id + division.id}
+                  key={(excellence.award.id ?? 0) + (division.id ?? 0)}
                   event={event}
                   divisionTeams={divisionTeams}
                   eventTeams={eventPresentTeams}
                   rankings={rankings}
-                  division={division.id}
+                  division={division.id ?? 0}
                   skills={skills}
                   excellence={excellence}
                 />

@@ -8,7 +8,7 @@ import {
   EventTeamsByDivision,
   useByGrade,
 } from "../util/eventHooks";
-import { Event } from "robotevents/out/endpoints/events";
+import { Event } from "robotevents";
 import { getTeamEligibilityList, TeamEligibility } from "../util/eligibility";
 import * as csv from "csv-stringify/browser/esm/sync";
 import { TeamEligibilityTable } from "./TeamEligibility";
@@ -27,19 +27,24 @@ export type AwardEvaluationProps = {
 };
 
 const AwardEvaluation: React.FC<AwardEvaluationProps> = (props) => {
-  // Base Data
-  const division = props.event?.divisions.find(
+  const division = props.event?.divisions?.find(
     (d) => d.id === props.division
-  ) ?? { id: 1, name: "Competition", order: 1 };
+  ) ?? { id: props.division, name: "Competition", order: 1 };
 
   const teams = useByGrade(
-    props.divisionTeams[division.id],
+    props.divisionTeams[division.id || props.division] || {
+      overall: [],
+      grades: {},
+    },
     props.excellence.grade,
     []
   );
   const eventTeams = useByGrade(props.eventTeams, props.excellence.grade, []);
   const rankings = useByGrade(
-    props.rankings[division.id],
+    props.rankings[division.id || props.division] || {
+      overall: [],
+      grades: {},
+    },
     props.excellence.grade,
     []
   );
@@ -73,7 +78,7 @@ const AwardEvaluation: React.FC<AwardEvaluationProps> = (props) => {
     () =>
       [
         props.event?.sku,
-        division.name.toLowerCase().replace(/ /g, "_"),
+        (division.name || "competition").toLowerCase().replace(/ /g, "_"),
         props.excellence.grade.toLowerCase().replace(/ /g, "_"),
         "excellence.csv",
       ].join("_"),
@@ -85,7 +90,7 @@ const AwardEvaluation: React.FC<AwardEvaluationProps> = (props) => {
     [teamEligibility]
   );
 
-  if ((props.event?.divisions.length ?? 1) > 1 && teams.length === 0) {
+  if ((props.event?.divisions?.length ?? 1) > 1 && teams.length === 0) {
     return null;
   }
 
@@ -93,8 +98,8 @@ const AwardEvaluation: React.FC<AwardEvaluationProps> = (props) => {
     <section className="mt-4">
       <h2 className="font-bold">
         {props.excellence.award.title}
-        {(props.event?.divisions.length ?? 1) > 1
-          ? ` — ${division.name}`
+        {(props.event?.divisions?.length ?? 1) > 1
+          ? ` — ${division.name || "Competition"}`
           : null}
       </h2>
       <p>Teams In Group: {teamsInGroup}</p>
@@ -114,7 +119,10 @@ const AwardEvaluation: React.FC<AwardEvaluationProps> = (props) => {
       </p>
       <ul className="flex flex-wrap gap-2 mt-2">
         {eligibleTeams.map((team) => (
-          <li className="bg-green-400 text-black px-2 font-mono rounded-md">
+          <li
+            key={team.id}
+            className="bg-green-400 text-black px-2 font-mono rounded-md"
+          >
             {team.number}
           </li>
         ))}

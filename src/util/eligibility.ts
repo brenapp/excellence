@@ -1,6 +1,4 @@
-import { Ranking } from "robotevents/out/endpoints/rankings";
-import { Skill } from "robotevents/out/endpoints/skills";
-import { Team } from "robotevents/out/endpoints/teams";
+import { Ranking, Skill, Team } from "robotevents";
 
 export type TeamEligibilityCriterion = {
   eligible: boolean;
@@ -42,7 +40,7 @@ export function getTeamEligibility({
   // Top 40% of teams at the conclusion of qualifying matches
   let rankingCriterion = { eligible: false, rank: 0, reason: "" };
   const qualifyingRank =
-    rankings.findIndex((ranking) => ranking.team.id === team.id) + 1;
+    rankings.findIndex((ranking) => ranking.team?.id === team.id) + 1;
 
   if (!qualifyingRank) {
     rankingCriterion = {
@@ -73,7 +71,7 @@ export function getTeamEligibility({
   };
   const autoSkillsRank =
     autoRankings.findIndex(
-      (ranking) => ranking.programming?.team.id === team.id
+      (ranking) => ranking.programming?.team?.id === team.id
     ) + 1;
   const autoSkillsRecord = autoRankings[autoSkillsRank - 1]?.programming;
 
@@ -84,26 +82,26 @@ export function getTeamEligibility({
       rank: 0,
       score: 0,
     };
-  } else if (autoSkillsRecord.score < 1) {
+  } else if ((autoSkillsRecord.score ?? 0) < 1) {
     autoSkillsCriterion = {
       eligible: false,
       rank: autoSkillsRank,
-      score: autoSkillsRecord.score,
+      score: autoSkillsRecord.score ?? 0,
       reason: `Zero Score`,
     };
   } else if (autoSkillsRank > skillsThreshold) {
     autoSkillsCriterion = {
       eligible: false,
       rank: autoSkillsRank,
-      score: autoSkillsRecord.score,
-      reason: `Auto Skills Rank ${autoSkillsRank} [score: ${autoSkillsRecord.score}]`,
+      score: autoSkillsRecord.score ?? 0,
+      reason: `Auto Skills Rank ${autoSkillsRank} [score: ${autoSkillsRecord.score ?? 0}]`,
     };
   } else {
     autoSkillsCriterion = {
       eligible: true,
       rank: autoSkillsRank,
-      score: autoSkillsRecord.score,
-      reason: `Auto Skills Rank ${autoSkillsRank} [score: ${autoSkillsRecord.score}]`,
+      score: autoSkillsRecord.score ?? 0,
+      reason: `Auto Skills Rank ${autoSkillsRank} [score: ${autoSkillsRecord.score ?? 0}]`,
     };
   }
 
@@ -111,7 +109,7 @@ export function getTeamEligibility({
   let skillsCriterion = { eligible: false, reason: "", rank: 0, score: 0 };
   const overallSkillsRank =
     skills.findIndex((record) => {
-      const number = record.driver?.team.id ?? record.programming?.team.id;
+      const number = record.driver?.team?.id ?? record.programming?.team?.id;
       return number === team.id;
     }) + 1;
   const skillsRecord = skills?.[overallSkillsRank - 1]?.overall;
