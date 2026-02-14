@@ -1,5 +1,5 @@
 import "./App.css";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -18,7 +18,25 @@ import {
 import AwardEvaluation from "./components/AwardEvaluation";
 
 function App() {
-  const [sku, setSku] = useState("");
+  // Initialize SKU from URL query params
+  const [sku, setSku] = useState(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get("sku") ?? "";
+  });
+
+  // Update URL when SKU changes
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (sku) {
+      searchParams.set("sku", sku);
+    } else {
+      searchParams.delete("sku");
+    }
+    const newUrl = searchParams.toString() 
+      ? `${window.location.pathname}?${searchParams}` 
+      : window.location.pathname;
+    window.history.replaceState({}, "", newUrl);
+  }, [sku]);
 
   const {
     data: event,
