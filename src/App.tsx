@@ -161,7 +161,7 @@ function App() {
               sportsmanship, and professionalism
             </li>
           </ol>
-          <details className="bg-zinc-900 rounded-md mb-2 p-2">
+          <details className="bg-zinc-100 dark:bg-zinc-900 rounded-md mb-2 p-2">
             <summary className="m-2">
               <span className="ml-2">Blended Events</span>
             </summary>
@@ -192,7 +192,7 @@ function App() {
         </section>
         <section className="grid lg:grid-cols-8 gap-4 mt-4">
           <select
-            className="px-4 py-4 rounded-md bg-zinc-900 col-span-6"
+            className="px-4 py-4 rounded-md bg-zinc-100 dark:bg-zinc-900 col-span-6"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
             disabled={isLoadingEventsToday}
@@ -214,7 +214,7 @@ function App() {
             type="text"
             pattern="RE-(VRC|V5RC|VURC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}"
             placeholder="SKU"
-            className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 bg-zinc-900 lg:col-span-2"
+            className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 bg-zinc-100 dark:bg-zinc-900 lg:col-span-2"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
             title="The RobotEvents Event Code"
